@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>video-player-test</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        div {
+            position: relative;
+            width: 100%;
+            max-width: 375px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        div>* {
+            flex: 1;
+            width: 100%;
+        }
+        
+        input {
+            --progress: #ff9900;
+            --background: #444444;
+            --value: 0%;
+            -webkit-appearance: none;
+            position: absolute;
+            appearance: none;
+            bottom: -5px;
+            width: 100%;
+            height: 5px;
+            background: rgb(199, 199, 199);
+            background: linear-gradient(to right, var(--progress) 0%, var(--progress) var(--value), var(--background) var(--value), var(--background) 100%);
+        }
+        
+        input::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 7.5px;
+            background: white;
+            border: 1px solid #444444;
+        }
+        /* input::-webkit-slider-runnable-track {
+            background: red;
+        } */
+        /* input::-webkit-scrollbar-track-piece {
+            background: green;
+        } */
+        /* input::-webkit-progress-bar {
+            background: blue;
+        } */
+    </style>
+</head>
+
+<body>
+    <div>
+        <video class="viewer" src="./video.mp4" height="500px"></video><br>
+        <input type="range" value="0" min="0" max="100" step="1" class="volume">
+    </div>
+    <script>
+        let video = document.querySelector('video')
+        let progress = document.querySelector('input')
+
+        let videoController = {
+            video: video,
+            progress: progress,
+            events: {
+                click: "click",
+                mousedown: "mousedown",
+                mouseup: "mouseup",
+                mousemove: "mousemove"
+            },
+            interval: null,
+            intervalTime: 100,
+            progressStep: 0.001,
+            isPressed: false,
+            isWasPaused: false,
+            toggle() {
+                if (this.video.paused) {
+                    this.play()
+                } else {
+                    this.pause()
+                }
+            },
+            play() {
+                this.video.play();
+
+                this.interval = setInterval(() => {
+                    this.playHandler()
+                }, this.intervalTime)
+            },
+            pause() {
+                this.video.pause();
+
+                clearInterval(this.interval)
+            },
+
+            playHandler() {
+                this.updateProgress()
+            },
+            updateProgress(percent) {
+                if (!percent) {
+                    percent = this.video.currentTime / this.video.duration * 100
+                }
+                this.progress.value = percent
+                this.updateProgressView(percent)
+            },
+            updateProgressView(percent = this.progress.valueAsNumber) {
+                this.progress.style.setProperty('--value', percent.toFixed(3) + '%');
+            },
+            onToggle(e) {
+                this.toggle(e)
+            },
+            onPressed(e) {
+                console.log(this.progress.valueAsNumber + '%', e.type)
+                this.isPressed = true
+                this.isWasPaused = this.video.paused
+                this.pause()
+                this.updateProgressView()
+                console.log(e)
+            },
+            onReleased(e) {
+                console.log(this.progress.valueAsNumber + '%', e.type)
+                this.isPressed = false
+                this.updateProgressView()
+                if (!this.isWasPaused) {
+                    this.play()
+                }
+                console.log(e)
+            },
+            onMoved(e) {
+                console.log(this.progress.valueAsNumber + '%', e.type)
+                if (this.isPressed) {
+                    this.updateProgress(this.progress.valueAsNumber)
+                    console.log(e)
+                }
+            },
+
+            init() {
+                this.progress.setAttribute('step', this.progressStep)
+                this.video.addEventListener(this.events.click, (e) => {
+                    this.onToggle(e);
+                })
+                this.progress.addEventListener(this.events.mousedown, (e) => {
+                    this.onPressed(e);
+                })
+                this.progress.addEventListener(this.events.mouseup, (e) => {
+                    this.onReleased(e);
+                })
+                this.progress.addEventListener(this.events.mousemove, (e) => {
+                    this.onMoved(e);
+                })
+                this.progress.addEventListener(this.events.click, (e) => {
+                    this.onPressed(e);
+                })
+            }
+        }
+        videoController.init()
+    </script>
+</body>
+
+</html>
