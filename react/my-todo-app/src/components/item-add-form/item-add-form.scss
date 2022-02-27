@@ -1,0 +1,33 @@
+@import "../../utils.scss";
+.item-add-form {
+    display: flex;
+    height: 44px;
+    justify-content: space-between;
+    padding-left: 12px;
+    box-shadow: inset 0px -2px 0px $hover-grey;
+    .item-add-input {
+        border: none;
+        font-size: 16px;
+        background: none;
+        width: 100%;
+        &:focus {
+            outline: none;
+        }
+    }
+    .actions {
+        display: flex;
+        align-items: center;
+        button {
+            border: none;
+            background: none;
+            width: 44px;
+            height: 44px;
+            &:hover {
+                background: $hover-grey;
+            }
+            &:active {
+                background: $button-active;
+            }
+        }
+    }
+}

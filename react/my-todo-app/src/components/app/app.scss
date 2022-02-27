@@ -1,0 +1,23 @@
+@import '@carbon/type/scss/type';
+@import '@carbon/type/scss/font-face/mono';
+@import '@carbon/type/scss/font-face/sans';
+@import "../../utils.scss";
+@include carbon--type-reset();
+@include carbon--font-face-mono();
+@include carbon--font-face-sans();
+.container {
+    display: flex;
+    justify-content: center;
+    .app {
+        display: flex;
+        justify-content: center;
+        color: $color-grey;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 370px;
+        width: 100%;
+        * {
+            font-family: carbon--font-family('mono');
+        }
+    }
+}
