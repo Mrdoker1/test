@@ -1,0 +1,56 @@
+@import "../../utils.scss";
+.list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: $list-background;
+    &.done {
+        background: #def5de;
+    }
+     :hover {
+        color: black;
+    }
+    .actions {
+        display: flex;
+        & * {
+            color: $color-light;
+        }
+        &.hide {
+            display: none;
+        }
+        button {
+            border: none;
+            background: none;
+            width: 44px;
+            height: 44px;
+            &:hover {
+                background: $hover-grey;
+                svg {
+                    fill: black;
+                }
+            }
+            &:active {
+                background: $button-active;
+            }
+        }
+    }
+    span {
+        box-sizing: border-box;
+        width: calc(100% - 88px);
+        padding: 12px 12px;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+        color: $color-light;
+        &.edit {
+            background: $list-edit;
+            color: $color-grey;
+            min-height: 44px;
+            outline: none;
+            resize: none;
+        }
+        &.done {
+            text-decoration: line-through;
+            color: green;
+        }
+    }
+}
