@@ -1,0 +1,17 @@
+.container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+.c {
+    width: 20px;
+    height: 20px;
+    background-color: aquamarine;
+    order: 2;
+}
+
+.c.cc {
+    background-color: rgb(127, 255, 165);
+    order: 3;
+}
