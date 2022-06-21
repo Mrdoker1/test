@@ -1,6 +1,6 @@
-function Person (name, func) {
+function Person (name, age) {
     this.name = name;
-    this.greet = func;
+    this.age = age;
 }
   
 Person.prototype.sayHi = function () {
@@ -8,23 +8,35 @@ Person.prototype.sayHi = function () {
 };
 
 function nouveau (Constructor, ...args) {
-    const obj = {
-        constructor: Constructor
+    let obj = {
+      constructor: Constructor
+    }
+    if (Array.isArray(Constructor())) {
+        return Constructor();
+    } 
+    if (Constructor() instanceof Date) {
+        return Constructor();
+    }
+    if (!Constructor() instanceof Object) {
+        return Constructor();
+    }
+    if (typeof Constructor() === 'object' && Constructor() !== null) {
+        return Constructor();
+    }
+    if (typeof Constructor() === 'function'){
+      return obj.constructor();
     }
     obj.constructor(...args)
-    let object = Object.keys(obj).reduce((a, key) => {
-        a[ key ] = obj[ key ]
-        return a
-    }, {});
-
-    for(var k in Constructor.prototype) object[k]=Constructor.prototype[k];
-
-    Object.setPrototypeOf(object, Constructor.prototype)
-    return object;
+    Object.setPrototypeOf(obj, Constructor.prototype)
+    return obj
 }
 
-var guy = nouveau(Person, 'Guy', function(){console.log('Hi')} );
 
-console.log(nouveau(Person, 'Guy', function(){console.log('Hi')}));
-console.log(guy.name);
-console.log(guy.sayHi());
+var john = nouveau(Person, 'John', 30);
+var jack = nouveau(Person, 'Jack', 40);
+
+console.log(john.name);
+console.log(john.sayHi());
+
+console.log(jack.name);
+console.log(jack.sayHi());
