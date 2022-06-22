@@ -10,6 +10,7 @@ function undoRedo(object) {
 		properties: {...object}
 	}
 	let operations = [state];
+	let redoOperations = [];
 
 	return {
 		set: function(key, value) {
@@ -55,6 +56,7 @@ function undoRedo(object) {
 				}
 
 				operations[operationPointer].undo = true;
+				redoOperations.push(operations[operationPointer]);
 				operationPointer--;
 
 				Object.keys(object).forEach(key => {
@@ -74,20 +76,22 @@ function undoRedo(object) {
 			console.log('Pointer undo ' + operationPointer);
 			console.log('function' + JSON.stringify(operations[operationPointer]));
 			console.log('object' + JSON.stringify(object));
+			console.log('redo' + JSON.stringify(redoOperations));
 		},
 		redo: function() {
-			if (operationPointer < operations.length - 1){
-				operationPointer++;
+			if (redoOperations.length > 0){
 
+				let operation = operations[redoOperations.length - 1];
+				
 				Object.keys(object).forEach(key => {
 					delete object[key];
 				});
 
-				Object.keys(operations[operationPointer].properties).forEach(key => {
-					object[key] = operations[operationPointer].properties[key];
+				Object.keys(operation.properties).forEach(key => {
+					object[key] = operation.properties[key];
 				});
-
-				operations[operationPointer].function(...operations[operationPointer].args)
+				operation.function(...operation.args);
+				redoOperations.pop();
 			} else {
 				throw 'Nothing to Redo!'
 			}
