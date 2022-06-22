@@ -1,6 +1,5 @@
 function undoRedo(object) {
 
-	let operationPointer = 1;
 	let state = {
 		function: function(){},
 		args: [],
@@ -10,7 +9,7 @@ function undoRedo(object) {
 		properties: {...object}
 	}
 	let operations = [state];
-	let redoOperations = [];
+	let redoList = [];
 
 	return {
 		set: function(key, value) {
@@ -22,11 +21,12 @@ function undoRedo(object) {
 				undo: false,
 				properties: {...object}
 			}
-			operationPointer = operations.length;
 			operations.push(operation);
+			redoList = [];
 			object[key] = value;
 		},
 		get: function(key) {
+			console.log( object[key]);
 			return object[key]
 		},
 		del: function(key) {
@@ -38,51 +38,16 @@ function undoRedo(object) {
 				undo: false,
 				properties: {...object}
 			}
-			operationPointer = operations.length;
 			operations.push(operation);
+			redoList = [];
 			delete object[key]
 		},
 		undo: function() {
 
-			if (operationPointer > 0){
+			if (operations.length > 1){
 
-				if (operations.length > 2){
-					if (operations[operations.length - 3].undo == true && 
-						operations[operations.length - 1].operation == 'del' &&
-						operations[operations.length - 2].operation == 'set'){
-							operations.length = 1;
-							return;
-						}
-				}
+				let operation = operations[operations.length - 2];
 
-				operations[operationPointer].undo = true;
-				redoOperations.push(operations[operationPointer]);
-				operationPointer--;
-
-				Object.keys(object).forEach(key => {
-					delete object[key];
-				});
-
-				Object.keys(operations[operationPointer].properties).forEach(key => {
-					object[key] = operations[operationPointer].properties[key];
-				});
-
-				operations[operationPointer].function(...operations[operationPointer].args)
-
-			} else {
-				throw 'Nothing to Undo!'
-			}
-
-			console.log('Pointer undo ' + operationPointer);
-			console.log('function' + JSON.stringify(operations[operationPointer]));
-			console.log('object' + JSON.stringify(object));
-			console.log('redo' + JSON.stringify(redoOperations));
-		},
-		redo: function() {
-			if (redoOperations.length > 0){
-
-				let operation = operations[redoOperations.length - 1];
-				
 				Object.keys(object).forEach(key => {
 					delete object[key];
 				});
@@ -90,30 +55,66 @@ function undoRedo(object) {
 				Object.keys(operation.properties).forEach(key => {
 					object[key] = operation.properties[key];
 				});
+
 				operation.function(...operation.args);
-				redoOperations.pop();
+				redoList.push(operations[operations.length - 1])
+				operations.pop();
+
+			} else {
+				throw 'Nothing to Undo!'
+			}
+		},
+		redo: function() {
+
+			if (redoList.length > 0){
+
+				let operation = redoList[redoList.length - 1];
+
+				Object.keys(object).forEach(key => {
+					delete object[key];
+				});
+
+				Object.keys(operation.properties).forEach(key => {
+					object[key] = operation.properties[key];
+				});
+
+				operation.function(...operation.args)
+				operations.push(redoList[redoList.length - 1])
+				redoList.pop();
+
 			} else {
 				throw 'Nothing to Redo!'
 			}
-			console.log('Pointer undo ' + operationPointer);
-			console.log('function' + JSON.stringify(operations[operationPointer]));
-			console.log('object' + JSON.stringify(object));
 		}
 	};
 }
 
-let obj = {
+var obj = {
 	x: 1,
 	y: 2
-};
+  };
 
-let unRe = undoRedo(obj);
+var unRe = undoRedo(obj);
+unRe.set('y', 10);
+unRe.set('y', 100);
+unRe.set('x', 150);
+unRe.set('x', 50);
 
-unRe.set('y', 10);  //0
-unRe.del('y', 20);  //0
+unRe.get('y')// 100, 'The get method returns the value of a key');
+unRe.get('x')// 50, 'The get method returns the value of a key');
+
 unRe.undo();
-unRe.set('y', 10);  //0
-unRe.del('y', 20);  //0
+
+unRe.get('x')//150, 'The undo method restores the previous state');
+unRe.get('y')//100, 'The y key stays the same');
+
+unRe.redo();
+
+unRe.get('x')//50, 'Undo the x value');
+unRe.get('y')//100, 'The y key stays the same');
+
+unRe.undo();
 unRe.undo();
 
-console.log(unRe.get('y'));
+unRe.get('x')// 1, 'Undo the x value');
+unRe.get('y')// 100, 'The y key stays the same');
